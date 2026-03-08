@@ -19,9 +19,10 @@ import io
 API_BASE = 'https://ai-gateway.trickle-lab.tech/api/v1'
 DEFAULT_MODEL = 'google/gemini-3.1-flash-image-preview'
 
-# 20 Greatest Poster Artists Styles
+# 30+ Design Styles: Poster Artists + Book Cover + Album Cover + Social Media
 ARTIST_STYLES = {
     "auto": "let AI choose best style",
+    # === Poster Artists (20) ===
     "saul-bass": "Saul Bass minimalist geometric abstraction, 2-3 colors, visual metaphor",
     "olly-moss": "Olly Moss ultra-minimal negative space, clever hidden imagery, 2 colors",
     "tyler-stout": "Tyler Stout maximalist character collage, intricate line work, organized chaos",
@@ -42,6 +43,23 @@ ARTIST_STYLES = {
     "josef-muller-brockmann": "Josef Müller-Brockmann Swiss grid, Helvetica, mathematical precision",
     "paul-rand": "Paul Rand playful geometry, clever visual puns, witty intelligent",
     "paula-scher": "Paula Scher typographic maximalism, layered text, vibrant expressive letters",
+    # === Book Cover Designers (6) ===
+    "chip-kidd": "Chip Kidd conceptual book cover, single symbolic object, bold typography, photographic metaphor, witty visual pun, Random House literary aesthetic",
+    "peter-mendelsund": "Peter Mendelsund abstract literary cover, deconstructed typography, minimal symbolic elements, intellectual negative space, Knopf literary elegance",
+    "coralie-bickford-smith": "Coralie Bickford-Smith Penguin Clothbound Classics, repeating decorative patterns, Art Nouveau foil stamping, jewel-tone palette, ornamental borders, fabric texture",
+    "david-pearson": "David Pearson Penguin Great Ideas, bold typographic-only cover, text as visual element, minimal color, intellectual and clean, type-driven design",
+    "wang-zhi-hong": "Wang Zhi-Hong East Asian book design, restrained elegant typography, confident negative space, subtle texture, balanced asymmetry, literary sophistication",
+    "jan-tschichold": "Jan Tschichold modernist Penguin typography, Swiss precision grid, clean serif fonts, understated elegance, timeless typographic hierarchy",
+    # === Album Cover Designers (3) ===
+    "reid-miles": "Reid Miles Blue Note Records, bold asymmetric typography, high contrast black and single accent color, jazz photography silhouette, dramatic negative space, vintage vinyl",
+    "david-stone-martin": "David Stone Martin Verve Records, single gestural ink brushstroke, minimalist line drawing on cream, fluid calligraphic lines, maximum negative space, improvisational energy",
+    "peter-saville": "Peter Saville Factory Records extreme minimalism, single abstract form in vast empty space, monochromatic, no text on cover, conceptual and mysterious, intellectual restraint",
+    # === Social Media / Chinese Aesthetic Styles (4) ===
+    "wenyi": "文艺风 literary artistic style, soft muted tones, generous white space, delicate serif typography, watercolor texture, poetic atmosphere, refined and contemplative, editorial book review aesthetic",
+    "guochao": "国潮风 Chinese contemporary trend, traditional Chinese motifs reimagined modern, bold red and gold palette, ink wash meets graphic design, cultural symbols with street art energy, 新中式",
+    "rixi": "日系 Japanese aesthetic, warm film grain, soft natural light, pastel muted palette, clean minimal layout, hand-drawn accents, cozy atmosphere, wabi-sabi imperfection, zakka lifestyle",
+    "hanxi": "韩系 Korean aesthetic, clean bright pastel, soft gradient backgrounds, modern sans-serif typography, dreamy ethereal quality, sophisticated minimal, Instagram-worthy composition",
+    # === Generic Styles ===
     "minimal": "minimalist, centered single focal point, 2-3 color palette, clean simple",
     "atmospheric": "single strong focal element with atmospheric background, 3-4 colors",
     "negative-space": "figure-ground inversion, negative space reveals hidden element, 2 colors"

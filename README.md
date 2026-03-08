@@ -52,19 +52,19 @@ AI会自动帮你搞定这一切！🎉
 
 ## 📸 看看能生成什么样的设计
 
-### 场景1：公众号/读书笔记封面
+### 场景1：公众号封面 / 读书笔记
 
 <table>
   <tr>
     <td width="50%">
-      <img src="examples/usecase-wechat-cover.png" alt="百年孤独 - 公众号封面"><br>
+      <img src="examples/usecase-wechat-cover.png" alt="百年孤独 - 文艺风公众号封面"><br>
       <b>提示词</b>: "为《百年孤独》设计读书笔记封面"<br>
-      <i>→ AI选择了 Alphonse Mucha 新艺术风格，蝴蝶与时间的轮回</i>
+      <i>→ AI选择了文艺风：柔和色调、大面积留白、水彩质感</i>
     </td>
     <td width="50%">
-      <img src="examples/usecase-book-cover.png" alt="三体 - 书籍封面"><br>
-      <b>提示词</b>: "为《三体》设计书籍封面"<br>
-      <i>→ AI选择了 Kilian Eng 几何未来主义，三个太阳与文明碰撞</i>
+      <img src="examples/usecase-book-v2-penguin.png" alt="百年孤独 - Penguin经典版"><br>
+      <b>提示词</b>: "为《百年孤独》设计精装书封面"<br>
+      <i>→ AI选择了 Penguin Clothbound 经典风格：翡翠绿底+金色蝴蝶纹样</i>
     </td>
   </tr>
 </table>
@@ -74,31 +74,31 @@ AI会自动帮你搞定这一切！🎉
 <table>
   <tr>
     <td width="50%">
-      <img src="examples/usecase-xiaohongshu.png" alt="花样年华 - 小红书配图"><br>
+      <img src="examples/usecase-xiaohongshu.png" alt="花样年华 - 日系小红书"><br>
       <b>提示词</b>: "为《花样年华》设计观影笔记配图"<br>
-      <i>→ AI选择了 Toulouse-Lautrec 平面色块，旗袍女子与昏暗走廊</i>
+      <i>→ AI选择了日系风格：温暖胶片感、柔和自然光、淡雅色调</i>
     </td>
     <td width="50%">
       <img src="examples/imdb-01-shawshank.png" alt="肖申克的救赎"><br>
       <b>提示词</b>: "为《肖申克的救赎》设计海报"<br>
-      <i>→ AI使用负空间技巧，铁栏中飞出自由之鸟</i>
+      <i>→ AI使用Mondo负空间技巧，铁栏中飞出自由之鸟</i>
     </td>
   </tr>
 </table>
 
-### 场景3：歌单封面 / 专辑封面
+### 场景3：书籍封面设计
 
 <table>
   <tr>
     <td width="50%">
-      <img src="examples/usecase-album-cover.png" alt="深夜爵士 - 专辑封面"><br>
-      <b>提示词</b>: "为深夜爵士歌单设计封面"<br>
-      <i>→ AI选择了 Milton Glaser 迷幻波普，萨克斯与城市灯光</i>
+      <img src="examples/usecase-book-cover.png" alt="三体 - Chip Kidd概念封面"><br>
+      <b>提示词</b>: "为《三体》设计书籍封面"<br>
+      <i>→ AI选择了 Chip Kidd 概念派：黑色虚空中一个被扭曲的红色太阳</i>
     </td>
     <td width="50%">
-      <img src="examples/imdb-03-dark-knight.png" alt="蝙蝠侠"><br>
-      <b>提示词</b>: "为《黑暗骑士》设计海报"<br>
-      <i>→ AI使用视觉双关，蝙蝠中的小丑</i>
+      <img src="examples/usecase-album-cover.png" alt="深夜爵士 - Peter Saville极简"><br>
+      <b>提示词</b>: "为深夜爵士歌单设计封面"<br>
+      <i>→ AI选择了 Peter Saville 极简：深蓝虚空中一个萨克斯图标</i>
     </td>
   </tr>
 </table>
@@ -120,12 +120,24 @@ AI会自动帮你搞定这一切！🎉
   </tr>
 </table>
 
-### 负空间大师级技巧
+### 经典电影海报 (IMDB Top 10)
 
-<img src="examples/example-negative-space.png" width="400" alt="唐伯虎点秋香">
-
-**提示词**: "为《唐伯虎点秋香》设计一张海报"
-**结果**: AI自动选择了负空间技巧，扇子轮廓内形成女性侧脸剪影
+<table>
+  <tr>
+    <td width="33%">
+      <img src="examples/imdb-02-godfather.png" alt="教父"><br>
+      <b>教父</b> - <i>极简主义，操控之手</i>
+    </td>
+    <td width="33%">
+      <img src="examples/imdb-03-dark-knight.png" alt="黑暗骑士"><br>
+      <b>黑暗骑士</b> - <i>视觉双关，蝙蝠中的小丑</i>
+    </td>
+    <td width="33%">
+      <img src="examples/example-negative-space.png" alt="唐伯虎点秋香"><br>
+      <b>唐伯虎点秋香</b> - <i>负空间技巧，扇中藏女</i>
+    </td>
+  </tr>
+</table>
 
 ---
 
@@ -158,12 +170,15 @@ AI会自动帮你搞定这一切！🎉
 
 | 你说的内容类型 | AI自动选择的风格 | 为什么 |
 |--------------|----------------|-------|
-| 科幻电影《银翼杀手》 | **Kilian Eng 几何未来主义** | 精准的技术线条适合赛博朋克 |
-| 文艺电影《霸王别姬》 | **Alphonse Mucha 新艺术** | 流动曲线适合东方美学 |
-| 悬疑电影《低俗小说》 | **Olly Moss 超极简** | 负空间制造神秘感 |
-| 古典小说《百年孤独》 | **Toulouse-Lautrec 平面色块** | 复古风格匹配文学气质 |
-| 爵士音乐会 | **Jules Chéret 明亮色彩** | 欢快色调适合音乐氛围 |
-| 恐怖片《闪灵》 | **Saul Bass 极简几何** | 抽象形状营造不安感 |
+| 📱 公众号读书笔记 | **文艺风** 柔和留白水彩 | 诗意氛围适合深度阅读 |
+| 📕 小红书观影笔记 | **日系风** 胶片感温暖色调 | 温暖质感适合生活美学 |
+| 📚 书籍封面（文学） | **Penguin Clothbound** 经典纹样 | 出版级精装书美学 |
+| 📚 书籍封面（科幻） | **Chip Kidd** 概念派视觉隐喻 | Random House 级别设计 |
+| 🎵 专辑/歌单封面 | **Peter Saville** 极度抽象 | Factory Records 极简美学 |
+| 🎬 科幻电影海报 | **Kilian Eng** 几何未来主义 | 精准技术线条 |
+| 🎬 文艺电影海报 | **Alphonse Mucha** 新艺术 | 流动曲线东方美学 |
+| 🎬 悬疑电影海报 | **Olly Moss** 负空间 | 隐藏意象制造神秘感 |
+| 🎭 活动海报 | **Saul Bass** 极简几何 | 大胆抽象一目了然 |
 
 你不需要知道这些艺术家是谁，AI会根据你的描述自动匹配！
 
