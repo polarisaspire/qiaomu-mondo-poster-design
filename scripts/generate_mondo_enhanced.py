@@ -1,23 +1,21 @@
 #!/usr/bin/env python3
 """
 Mondo Style Design Generator - Enhanced Version
-Features: AI prompt optimization, 3-column comparison, image-to-image, 20 artist styles
+Features: Claude-generated prompts, 3-column comparison, image-to-image, 20 artist styles
 """
 
 import os
 import sys
 import argparse
-import requests
-import base64
 import json
 from datetime import datetime
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 import io
 
-# API Configuration
-API_BASE = 'https://ai-gateway.trickle-lab.tech/api/v1'
-DEFAULT_MODEL = 'google/gemini-3.1-flash-image-preview'
+# API Configuration - PipeLLM Gemini
+PIPELLM_BASE_URL = 'https://api.pipellm.ai'
+DEFAULT_IMAGE_MODEL = 'gemini-3-pro-image-preview'   # 高质量图片模型
 
 # 30+ Design Styles: Poster Artists + Book Cover + Album Cover + Social Media
 ARTIST_STYLES = {
@@ -65,73 +63,19 @@ ARTIST_STYLES = {
     "negative-space": "figure-ground inversion, negative space reveals hidden element, 2 colors"
 }
 
-def get_api_key():
-    """Get API key from environment variable"""
-    api_key = os.getenv('AI_GATEWAY_API_KEY')
+def get_genai_client():
+    """创建 PipeLLM google-genai 客户端"""
+    from google import genai
+    api_key = os.getenv('PIPELLM_API_KEY')
     if not api_key:
-        print("Error: AI_GATEWAY_API_KEY environment variable is required.")
-        print("Please set it with your AI Gateway API key.")
+        print("Error: PIPELLM_API_KEY environment variable is required.")
+        print("Please set: export PIPELLM_API_KEY=your_key")
         sys.exit(1)
-    return api_key
+    return genai.Client(
+        api_key=api_key,
+        http_options={"base_url": PIPELLM_BASE_URL}
+    )
 
-def ai_enhance_prompt(original_subject, design_type, user_preferences=""):
-    """
-    Use AI to enhance and optimize the prompt while respecting user's original intent
-
-    Args:
-        original_subject: User's original subject/idea
-        design_type: Type of design (movie/book/album/event)
-        user_preferences: Optional user specifications (colors, style, elements)
-
-    Returns:
-        Enhanced prompt string
-    """
-    api_key = get_api_key()
-
-    enhancement_request = f"""Enhance this Mondo poster prompt while STRICTLY respecting the user's original intent:
-
-Original Subject: {original_subject}
-Design Type: {design_type}
-User Preferences: {user_preferences if user_preferences else "None specified - AI can suggest"}
-
-Create an optimized Mondo-style prompt that:
-1. KEEPS the core idea from user's original subject
-2. Adds ONE perfect symbolic visual element (not multiple)
-3. Suggests 2-3 complementary colors (user can override)
-4. Uses negative space or visual puns when possible
-5. Maintains Mondo screen print aesthetic
-6. Stays clean and minimal (not cluttered)
-
-Return ONLY the enhanced prompt text, no explanations."""
-
-    try:
-        response = requests.post(
-            f'{API_BASE}/chat/completions',
-            headers={
-                'Content-Type': 'application/json',
-                'Authorization': f'Bearer {api_key}'
-            },
-            json={
-                'model': 'google/gemini-3.1-flash',
-                'messages': [{'role': 'user', 'content': enhancement_request}],
-                'max_tokens': 300
-            },
-            timeout=30
-        )
-
-        response.raise_for_status()
-        result = response.json()
-
-        if 'choices' in result and len(result['choices']) > 0:
-            enhanced = result['choices'][0]['message']['content'].strip()
-            return enhanced
-        else:
-            print("⚠ AI enhancement failed, using standard template")
-            return None
-
-    except Exception as e:
-        print(f"⚠ AI enhancement error: {e}, using standard template")
-        return None
 
 def get_format_description(aspect_ratio):
     """Get format description text matching the aspect ratio"""
@@ -145,15 +89,15 @@ def get_format_description(aspect_ratio):
     }
     return ratio_descriptions.get(aspect_ratio, f"{aspect_ratio} format")
 
-def generate_prompt(subject, design_type, style="auto", ai_enhance=False, color_hint="", aspect_ratio="9:16"):
+def generate_prompt(subject, design_type, style="auto", color_hint="", aspect_ratio="9:16"):
     """
-    Generate Mondo-style prompt with optional AI enhancement
+    Generate Mondo-style prompt from subject.
+    When called by Claude, pass a rich pre-crafted prompt as subject for best results.
 
     Args:
-        subject: The subject matter
+        subject: The subject matter (or a fully-crafted Mondo prompt from Claude)
         design_type: Type of design ("movie", "book", "album", "event")
         style: Visual style (artist name or preset)
-        ai_enhance: Whether to use AI enhancement
         color_hint: Optional color preferences from user
         aspect_ratio: Aspect ratio for the image
 
@@ -161,13 +105,6 @@ def generate_prompt(subject, design_type, style="auto", ai_enhance=False, color_
         Generated prompt string
     """
     format_desc = get_format_description(aspect_ratio)
-
-    # AI Enhancement path (respects user intent)
-    if ai_enhance:
-        user_prefs = f"Style: {style}, Colors: {color_hint}" if color_hint else f"Style: {style}"
-        enhanced = ai_enhance_prompt(subject, design_type, user_prefs)
-        if enhanced:
-            return enhanced + f", Mondo poster style, screen print aesthetic, {format_desc}"
 
     # Standard template path
     base_elements = "Mondo poster style, screen print aesthetic, limited edition poster art"
@@ -193,82 +130,59 @@ def generate_prompt(subject, design_type, style="auto", ai_enhance=False, color_
 
     return prompt
 
-def generate_image(prompt, output_path=None, model=DEFAULT_MODEL, aspect_ratio="9:16", input_image=None):
-    """
-    Generate image using AI Gateway API with optional image-to-image
-
-    Args:
-        prompt: The text prompt
-        output_path: Path to save the image
-        model: Model to use
-        aspect_ratio: Aspect ratio
-        input_image: Optional input image path for image-to-image
-
-    Returns:
-        Path to saved image or None if failed
-    """
-    api_key = get_api_key()
-
-    payload = {
-        'model': model,
-        'prompt': prompt,
-        'response_format': 'b64_json',
-        'aspectRatio': aspect_ratio
-    }
-
-    # Add image-to-image support
-    if input_image and os.path.exists(input_image):
-        try:
-            with open(input_image, 'rb') as f:
-                img_b64 = base64.b64encode(f.read()).decode('utf-8')
-                payload['image'] = img_b64
-                payload['mode'] = 'image-to-image'
-                print(f"📷 Using input image: {input_image}")
-        except Exception as e:
-            print(f"⚠ Could not load input image: {e}")
+def generate_image(prompt, output_path=None, model=DEFAULT_IMAGE_MODEL, aspect_ratio="9:16", input_image=None):
+    """使用 PipeLLM Gemini 生成图片"""
+    client = get_genai_client()
 
     print(f"🎨 Generating with {model}")
-    print(f"📐 Aspect ratio: {aspect_ratio}")
     print(f"✍️  Prompt: {prompt[:80]}..." if len(prompt) > 80 else f"✍️  Prompt: {prompt}")
     print("⏳ Please wait...\n")
 
+    contents = [prompt]
+
+    # 图生图：把输入图片也传给模型
+    if input_image and os.path.exists(input_image):
+        try:
+            from google.genai import types
+            with open(input_image, 'rb') as f:
+                img_bytes = f.read()
+            pil_img = Image.open(io.BytesIO(img_bytes))
+            contents = [
+                types.Part.from_bytes(data=img_bytes, mime_type="image/png"),
+                f"Transform this image in Mondo poster style: {prompt}"
+            ]
+            print(f"📷 Using input image: {input_image}")
+        except Exception as e:
+            print(f"⚠ Could not load input image: {e}, ignoring")
+
     try:
-        response = requests.post(
-            f'{API_BASE}/images/generations',
-            headers={
-                'Content-Type': 'application/json',
-                'Authorization': f'Bearer {api_key}',
-                'Origin': 'https://trickle.so'
-            },
-            json=payload,
-            timeout=120
+        response = client.models.generate_content(
+            model=model,
+            contents=contents,
         )
 
-        response.raise_for_status()
-        result = response.json()
+        # 提取图片 part
+        image_part = None
+        for part in response.parts:
+            if part.inline_data is not None:
+                image_part = part
+                break
 
-        if 'data' in result and len(result['data']) > 0:
-            b64_data = result['data'][0].get('b64_json')
-            if b64_data:
-                image_data = base64.b64decode(b64_data)
-
-                if not output_path:
-                    timestamp = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
-                    output_path = f"outputs/mondo-{timestamp}.png"
-
-                os.makedirs(os.path.dirname(output_path) if os.path.dirname(output_path) else '.', exist_ok=True)
-
-                with open(output_path, 'wb') as f:
-                    f.write(image_data)
-
-                print(f"✅ Saved to {output_path}")
-                return output_path
-            else:
-                print("❌ No image data in response")
-                return None
-        else:
-            print("❌ Invalid response format")
+        if image_part is None:
+            print("❌ No image data in response")
             return None
+
+        if not output_path:
+            timestamp = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+            default_dir = os.path.expanduser("~/乔木新知识库/60-69 素材/61 AI图片/mondo-designs")
+            os.makedirs(default_dir, exist_ok=True)
+            output_path = f"{default_dir}/mondo-{timestamp}.png"
+
+        os.makedirs(os.path.dirname(output_path) if os.path.dirname(output_path) else '.', exist_ok=True)
+        img = image_part.as_image()
+        img.save(output_path)
+        print(f"✅ Saved to {output_path}")
+        return output_path
 
     except Exception as e:
         print(f"❌ Error: {e}")
@@ -393,8 +307,6 @@ Examples:
                        help='Type of design to create')
     parser.add_argument('--style', choices=list(ARTIST_STYLES.keys()), default='auto',
                        help='Artist style (default: auto)')
-    parser.add_argument('--ai-enhance', action='store_true',
-                       help='Use AI to optimize prompt (respects your original intent)')
     parser.add_argument('--compare', type=str,
                        help='Generate 3-style comparison (comma-separated, e.g., "saul-bass,olly-moss,jock")')
     parser.add_argument('--input', type=str,
@@ -404,7 +316,7 @@ Examples:
     parser.add_argument('--aspect-ratio', '--ratio', dest='aspect_ratio', default='9:16',
                        help='Aspect ratio (default: 9:16)')
     parser.add_argument('--output', help='Output file path')
-    parser.add_argument('--model', default=DEFAULT_MODEL, help='Model to use')
+    parser.add_argument('--model', default=DEFAULT_IMAGE_MODEL, help='Model to use')
     parser.add_argument('--no-generate', action='store_true',
                        help='Only show prompt without generating')
     parser.add_argument('--list-styles', action='store_true',
@@ -431,7 +343,7 @@ Examples:
         return
 
     # Single generation mode
-    prompt = generate_prompt(args.subject, args.type, args.style, args.ai_enhance, args.colors, args.aspect_ratio)
+    prompt = generate_prompt(args.subject, args.type, args.style, args.colors, args.aspect_ratio)
 
     print(f"\n{'='*80}")
     print("🎨 MONDO POSTER PROMPT")
