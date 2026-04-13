@@ -9,7 +9,7 @@ Generate AI image prompts AND create actual designs in Mondo's distinctive alter
 
 **This skill can:**
 - Generate detailed Mondo-style prompts for any subject
-- Create actual images directly via AI Gateway API
+- Create actual images directly via the official Google Gemini API
 - Design movie posters, book covers, album art, event posters
 - Provide genre-specific and format-specific templates
 
@@ -442,11 +442,11 @@ If you prefer to generate prompts manually and use other image generation tools:
 
 1. Use this skill to generate the Mondo-style prompt
 2. Pass the prompt to:
-   - `/generate-image` - AI Gateway API (recommended)
+   - `/generate-image` - Google Gemini API or another image generation API
    - `/ai-image-generation` - FLUX, Gemini, and other models
    - `/qiaomu-image-generator` - For article/content illustrations
 
 **Recommended settings:**
-- Model: `google/gemini-3.1-flash-image-preview` (best quality/speed balance)
+- Model: `gemini-2.5-flash-image` or `gemini-3-pro-image-preview` depending on quality/speed needs
 - Resolution: 2K or higher for print quality
 - Format: PNG with transparency support
