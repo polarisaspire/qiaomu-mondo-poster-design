@@ -7,23 +7,17 @@ Automatically generates Mondo-style prompts and creates images for posters, book
 import os
 import sys
 import argparse
-import requests
-import base64
 from datetime import datetime
-from pathlib import Path
 
-# API Configuration
-API_BASE = 'https://ai-gateway.trickle-lab.tech/api/v1'
-DEFAULT_MODEL = 'google/gemini-3.1-flash-image-preview'
+from gemini_client import get_genai_client, iter_response_parts
+
+
+DEFAULT_MODEL = 'gemini-2.5-flash-image'
 
 def get_api_key():
-    """Get API key from environment variable"""
-    api_key = os.getenv('AI_GATEWAY_API_KEY')
-    if not api_key:
-        print("Error: AI_GATEWAY_API_KEY environment variable is required.")
-        print("Please set it with your AI Gateway API key.")
-        sys.exit(1)
-    return api_key
+    from gemini_client import get_gemini_api_key
+
+    return get_gemini_api_key()
 
 def generate_prompt(subject, design_type, style="auto"):
     """
@@ -82,19 +76,9 @@ def generate_prompt(subject, design_type, style="auto"):
     return prompt
 
 def generate_image(prompt, output_path=None, model=DEFAULT_MODEL, aspect_ratio="9:16"):
-    """
-    Generate image using AI Gateway API
-
-    Args:
-        prompt: The text prompt for image generation
-        output_path: Path to save the generated image
-        model: Model to use for generation
-        aspect_ratio: Aspect ratio (default: 9:16 for mobile/social media)
-
-    Returns:
-        Path to saved image or None if failed
-    """
-    api_key = get_api_key()
+    """Generate an image with the official Gemini API."""
+    get_api_key()
+    client = get_genai_client()
 
     print(f"Generating image with model: {model}")
     print(f"Aspect ratio: {aspect_ratio}")
@@ -102,60 +86,34 @@ def generate_image(prompt, output_path=None, model=DEFAULT_MODEL, aspect_ratio="
     print("Please wait...\n")
 
     try:
-        payload = {
-            'model': model,
-            'prompt': prompt,
-            'response_format': 'b64_json',
-            'aspectRatio': aspect_ratio
-        }
+        from google.genai import types
 
-        response = requests.post(
-            f'{API_BASE}/images/generations',
-            headers={
-                'Content-Type': 'application/json',
-                'Authorization': f'Bearer {api_key}',
-                'Origin': 'https://trickle.so'
-            },
-            json=payload,
-            timeout=120
+        response = client.models.generate_content(
+            model=model,
+            contents=[prompt],
+            config=types.GenerateContentConfig(
+                response_modalities=["TEXT", "IMAGE"]
+            ),
         )
 
-        response.raise_for_status()
-        result = response.json()
+        image_part = None
+        for part in iter_response_parts(response):
+            if part.inline_data is not None:
+                image_part = part
+                break
 
-        # Extract base64 image data
-        if 'data' in result and len(result['data']) > 0:
-            b64_data = result['data'][0].get('b64_json')
-            if b64_data:
-                # Decode and save
-                image_data = base64.b64decode(b64_data)
-
-                # Determine output path
-                if not output_path:
-                    timestamp = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
-                    output_path = f"outputs/mondo-{timestamp}.png"
-
-                # Ensure directory exists
-                os.makedirs(os.path.dirname(output_path) if os.path.dirname(output_path) else '.', exist_ok=True)
-
-                # Save image
-                with open(output_path, 'wb') as f:
-                    f.write(image_data)
-
-                print(f"✓ Image saved successfully to {output_path}")
-                return output_path
-            else:
-                print("Error: No b64_json data in response")
-                return None
-        else:
-            print("Error: Invalid response format")
+        if image_part is None:
+            print("Error: No image data in response")
             return None
 
-    except requests.exceptions.RequestException as e:
-        print(f"Error generating image: {e}")
-        if hasattr(e.response, 'text'):
-            print(f"Response: {e.response.text}")
-        return None
+        if not output_path:
+            timestamp = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+            output_path = f"outputs/mondo-{timestamp}.png"
+
+        os.makedirs(os.path.dirname(output_path) if os.path.dirname(output_path) else '.', exist_ok=True)
+        image_part.as_image().save(output_path)
+        print(f"✓ Image saved successfully to {output_path}")
+        return output_path
     except Exception as e:
         print(f"Unexpected error: {e}")
         return None

@@ -1,0 +1,7 @@
+.env
+.tmp_test_env_loader/
+.tmp_test_env_loader_*/
+outputs/
+tests/__pycache__/
+__pycache__/
+*.pyc

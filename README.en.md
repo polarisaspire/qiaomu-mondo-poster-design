@@ -4,7 +4,7 @@ English | [简体中文](README.md)
 
 > **One Sentence, Master-Level Design** - No Photoshop, no color theory, no art history? No problem. Just describe what you want in one sentence, and AI automatically selects the perfect artistic style to generate professional-grade posters, covers, and designs.
 
-**Powered by Google Gemini 3 Pro Image** 🎨
+**Powered by the Google Gemini API** 🎨
 
 ## 🚀 New in v3.0!
 
@@ -135,7 +135,7 @@ AI suggests or use your own
 - Python 3.7+
 - `requests` (required)
 - `Pillow` (optional, for comparison/image-to-image)
-- AI Gateway API Key as `AI_GATEWAY_API_KEY` env variable
+- Google Gemini API key as `GEMINI_API_KEY` env variable
 
 ```bash
 pip install -r requirements.txt

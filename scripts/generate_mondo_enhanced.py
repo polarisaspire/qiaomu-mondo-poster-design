@@ -7,15 +7,13 @@ Features: Claude-generated prompts, 3-column comparison, image-to-image, 20 arti
 import os
 import sys
 import argparse
-import json
 from datetime import datetime
-from pathlib import Path
-from PIL import Image, ImageDraw, ImageFont
-import io
+from PIL import Image, ImageDraw
 
-# API Configuration - PipeLLM Gemini
-PIPELLM_BASE_URL = 'https://api.pipellm.ai'
-DEFAULT_IMAGE_MODEL = 'gemini-3-pro-image-preview'   # 高质量图片模型
+from gemini_client import get_genai_client as build_genai_client, iter_response_parts
+
+
+DEFAULT_IMAGE_MODEL = 'gemini-3-pro-image-preview'
 
 # 30+ Design Styles: Poster Artists + Book Cover + Album Cover + Social Media
 ARTIST_STYLES = {
@@ -64,17 +62,7 @@ ARTIST_STYLES = {
 }
 
 def get_genai_client():
-    """创建 PipeLLM google-genai 客户端"""
-    from google import genai
-    api_key = os.getenv('PIPELLM_API_KEY')
-    if not api_key:
-        print("Error: PIPELLM_API_KEY environment variable is required.")
-        print("Please set: export PIPELLM_API_KEY=your_key")
-        sys.exit(1)
-    return genai.Client(
-        api_key=api_key,
-        http_options={"base_url": PIPELLM_BASE_URL}
-    )
+    return build_genai_client()
 
 
 def get_format_description(aspect_ratio):
@@ -131,7 +119,7 @@ def generate_prompt(subject, design_type, style="auto", color_hint="", aspect_ra
     return prompt
 
 def generate_image(prompt, output_path=None, model=DEFAULT_IMAGE_MODEL, aspect_ratio="9:16", input_image=None):
-    """使用 PipeLLM Gemini 生成图片"""
+    """Use the official Gemini API to generate an image."""
     client = get_genai_client()
 
     print(f"🎨 Generating with {model}")
@@ -140,13 +128,11 @@ def generate_image(prompt, output_path=None, model=DEFAULT_IMAGE_MODEL, aspect_r
 
     contents = [prompt]
 
-    # 图生图：把输入图片也传给模型
     if input_image and os.path.exists(input_image):
         try:
             from google.genai import types
             with open(input_image, 'rb') as f:
                 img_bytes = f.read()
-            pil_img = Image.open(io.BytesIO(img_bytes))
             contents = [
                 types.Part.from_bytes(data=img_bytes, mime_type="image/png"),
                 f"Transform this image in Mondo poster style: {prompt}"
@@ -156,14 +142,17 @@ def generate_image(prompt, output_path=None, model=DEFAULT_IMAGE_MODEL, aspect_r
             print(f"⚠ Could not load input image: {e}, ignoring")
 
     try:
+        from google.genai import types
         response = client.models.generate_content(
             model=model,
             contents=contents,
+            config=types.GenerateContentConfig(
+                response_modalities=["TEXT", "IMAGE"]
+            ),
         )
 
-        # 提取图片 part
         image_part = None
-        for part in response.parts:
+        for part in iter_response_parts(response):
             if part.inline_data is not None:
                 image_part = part
                 break
@@ -260,7 +249,6 @@ def generate_comparison(subject, design_type, styles, aspect_ratio="9:16", color
         comparison_path = f"outputs/comparison-{timestamp}.png"
         comparison.save(comparison_path)
 
-        # Clean up temp files
         for img_path in images:
             try:
                 os.remove(img_path)
